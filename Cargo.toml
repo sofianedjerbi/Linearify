@@ -6,6 +6,7 @@ authors = ["kugge <sofiane.djerbi38@gmail.com>"]
 readme = "README.md"
 license = "GPL-3.0"
 keywords = ["gamedev", "minecraft"]
+description = "Manipulate Minecraft region files"
 
 [dependencies]
 byteorder = "1.4.3"
