@@ -5,6 +5,7 @@ use std::io::{BufReader, Cursor, Read, SeekFrom};
 
 use byteorder::{BigEndian, ReadBytesExt};
 use zstd::stream::Decoder;
+use zstd::stream::decode_all;
 
 const LINEAR_SIGNATURE: i64 = -4323716122432332390;
 const LINEAR_VERSION: i8 = 2;
@@ -51,8 +52,6 @@ pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
     // Skip compression level (Byte): Unused
     buffer.seek(SeekFrom::Current(1))?;
     let chunk_count = buffer.read_i16::<BigEndian>()?;
-    // Skip compressed_length level (Long): Unused
-    buffer.seek(SeekFrom::Current(8))?;
     let compressed_length = buffer.read_i32::<BigEndian>()?;
     // Skip datahash (Long): Unused
     buffer.seek(SeekFrom::Current(8))?;
@@ -67,11 +66,15 @@ pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
         return Err(format!("Invalid footer signature: {}", signature_footer).into());
     }
 
-    let mut decoder = Decoder::with_buffer(buffer)?; // Decode with zstd
-    let mut raw: Vec<u8> = Vec::new();
-    decoder.read_to_end(&mut raw)?;
-    let mut cursor = Cursor::new(&raw);
+    // Read raw chunk
+    let mut raw = vec![0u8; compressed_length as usize];
+    buffer.read_exact(&mut raw)?;
+    let raw_cursor = Cursor::new(&raw);
+    // Decode data
+    let decoded: Vec<u8> = zstd::stream::decode_all(raw_cursor)?;
+    let mut cursor = Cursor::new(&decoded);
 
+    // Start deserializing
     let mut sizes: Vec<usize> = Vec::new();
     let mut timestamps: Vec<i32> = Vec::new();
     let mut chunks: Vec<Option<Chunk>> = Vec::new();
