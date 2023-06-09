@@ -1,2 +1,2 @@
-# Linearify
-Rust tool to manipulate Minecraft file formats
+![Linearify logo](logo.png)
+Fast region file format manipulation.
