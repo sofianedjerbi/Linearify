@@ -12,28 +12,28 @@ const LINEAR_SUPPORTED: [i8; 2] = [1, 2];
 const HEADER_SIZE: i32 = 8192;
 
 #[derive(Debug)]
-struct Chunk {
-    raw_chunk: Vec<u8>,
-    x: usize,
-    z: usize,
+pub struct Chunk {
+    pub raw_chunk: Vec<u8>,
+    pub x: usize,
+    pub z: usize,
 }
 
 #[derive(Debug)]
-struct Region {
-    chunks: Vec<Option<Chunk>>,
-    region_x: usize,
-    region_z: usize,
-    newest_timestamp: i32,
-    timestamps: Vec<i32>,
+pub struct Region {
+    pub chunks: Vec<Option<Chunk>>,
+    pub region_x: usize,
+    pub region_z: usize,
+    pub newest_timestamp: i32,
+    pub timestamps: Vec<i32>,
 }
 
 impl Region {
-    fn count_chunks(&self) -> usize {
+    pub fn count_chunks(&self) -> usize {
         self.chunks.iter().filter(|&chunk| chunk.is_none()).count()
     }
 }
 
-fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
+pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
     let coords: Vec<&str> = path.split('/').last().unwrap().split('.').collect();
     let region_x: usize = coords[1].parse::<usize>()?;
     let region_z: usize = coords[2].parse::<usize>()?;
