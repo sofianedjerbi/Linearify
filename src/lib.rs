@@ -23,7 +23,7 @@ pub struct Region {
     pub chunks: Vec<Option<Chunk>>,
     pub region_x: usize,
     pub region_z: usize,
-    pub newest_timestamp: i32,
+    pub newest_timestamp: i64,
     pub timestamps: Vec<i32>,
 }
 
@@ -47,7 +47,7 @@ pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
     buffer.seek(SeekFrom::Start(0))?; 
     let signature = buffer.read_i64::<BigEndian>()?;
     let version = buffer.read_i8()?;
-    let newest_timestamp = buffer.read_i32::<BigEndian>()?;
+    let newest_timestamp = buffer.read_i64::<BigEndian>()?;
     // Skip compression level (Byte): Unused
     buffer.seek(SeekFrom::Current(1))?;
     let chunk_count = buffer.read_i16::<BigEndian>()?;
@@ -58,13 +58,13 @@ pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
     buffer.seek(SeekFrom::Current(8))?;
 
     if signature != LINEAR_SIGNATURE {
-        return Err(format!("Invalid signature {}", signature).into());
+        return Err(format!("Invalid signature: {}", signature).into());
     }
     if !LINEAR_SUPPORTED.iter().any(|&num| num == version) {
-        return Err(format!("Invalid version {}", version).into());
+        return Err(format!("Invalid version: {}", version).into());
     }
     if signature_footer != LINEAR_SIGNATURE {
-        return Err(format!("Invalid footer signature {}", signature_footer).into());
+        return Err(format!("Invalid footer signature: {}", signature_footer).into());
     }
 
     let mut decoder = Decoder::with_buffer(buffer)?; // Decode with zstd
