@@ -58,13 +58,13 @@ pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
     buffer.seek(SeekFrom::Current(8))?;
 
     if signature != LINEAR_SIGNATURE {
-        return Err("Invalid signature".into());
+        return Err(format!("Invalid signature {}", signature).into());
     }
-    if LINEAR_SUPPORTED.iter().any(|&num| num == version) {
-        return Err("Invalid version".into());
+    if !LINEAR_SUPPORTED.iter().any(|&num| num == version) {
+        return Err(format!("Invalid version {}", version).into());
     }
     if signature_footer != LINEAR_SIGNATURE {
-        return Err("Invalid footer signature".into());
+        return Err(format!("Invalid footer signature {}", signature_footer).into());
     }
 
     let mut decoder = Decoder::with_buffer(buffer)?; // Decode with zstd
