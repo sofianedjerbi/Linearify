@@ -1,0 +1,13 @@
+[package]
+name = "linearify"
+version = "0.1.0"
+edition = "2021"
+authors = ["kugge <sofiane.djerbi38@gmail.com>"]
+readme = "README.md"
+license = "GPL-3.0"
+keywords = ["gamedev", "minecraft"]
+
+[dependencies]
+byteorder = "1.4.3"
+flate2 = "1.0.26"
+zstd = "0.12.3"
