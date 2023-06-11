@@ -18,8 +18,8 @@ const HEADER_SIZE: i32 = 8192;
 #[derive(Clone)]
 pub struct Chunk {
     pub raw_chunk: Vec<u8>,
-    pub x: usize,
-    pub z: usize,
+    pub x: i64,
+    pub z: i64,
 }
 
 // Don't print raw_chunk
@@ -36,25 +36,10 @@ impl fmt::Debug for Chunk {
 #[derive(Clone, Debug)]
 pub struct Region {
     pub chunks: Vec<Option<Chunk>>,
-    pub region_x: usize,
-    pub region_z: usize,
+    pub region_x: i64,
+    pub region_z: i64,
     pub timestamps: Vec<i32>,
     pub newest_timestamp: i64,
-}
-
-impl fmt::Display for Region {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (index, chunk) in self.chunks.iter().enumerate() {
-            match chunk {
-                Some(_) => print!("■"),
-                None => print!("□"),
-            }
-            if index % 32 == 31 {
-                println!();
-            }
-        }
-        Ok(())
-    }
 }
 
 impl Region {
@@ -120,8 +105,8 @@ impl Region {
 
 pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
     let coords: Vec<&str> = path.split('/').last().unwrap().split('.').collect();
-    let region_x: usize = coords[1].parse::<usize>()?;
-    let region_z: usize = coords[2].parse::<usize>()?;
+    let region_x: i64 = coords[1].parse::<i64>()?;
+    let region_z: i64 = coords[2].parse::<i64>()?;
 
     let file = File::open(path)?;
     let mut buffer = BufReader::new(file);
@@ -182,7 +167,7 @@ pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
     }
 
     if real_chunk_count != chunk_count {
-        return Err(format!("Invalid chunk count {}/{}", chunk_count, real_chunk_count).into());
+        return Err(format!("Invalid chunk count {}/{}", real_chunk_count, chunk_count).into());
     }
 
     // Save raw chunk data
@@ -192,8 +177,8 @@ pub fn open_linear(path: &str) -> Result<Region, Box<dyn Error>> {
             cursor.read_exact(&mut raw_chunk)?;
             chunks[i] = Some(Chunk {
                 raw_chunk,
-                x: 32 * region_x + i % 32,
-                z: 32 * region_z + i / 32,
+                x: 32 * region_x + (i as i64) % 32,
+                z: 32 * region_z + (i as i64) / 32,
             });
         }
     }
